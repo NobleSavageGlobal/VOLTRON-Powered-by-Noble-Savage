@@ -1,7 +1,7 @@
 'use client';
 
 import { Header } from '@/components/layout/Header';
-import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
 import { Zap, Clock, CheckCircle } from 'lucide-react';

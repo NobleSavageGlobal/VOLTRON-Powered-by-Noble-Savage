@@ -4,7 +4,7 @@ import { useDocuments } from '@/hooks/useDocuments';
 import { useTasks } from '@/hooks/useTasks';
 import { Header } from '@/components/layout/Header';
 import { StatsCard } from '@/components/dashboard/StatsCard';
-import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
+
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';

@@ -10,7 +10,6 @@ import { TaskList } from '@/components/tasks/TaskList';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
-import { Input } from '@/components/ui/Input';
 import { Plus } from 'lucide-react';
 
 const taskSchema = z.object({

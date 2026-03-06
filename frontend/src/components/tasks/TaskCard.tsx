@@ -1,4 +1,4 @@
-import { cn, getPriorityColor, getStatusColor } from '@/lib/utils';
+import { getPriorityColor, getStatusColor } from '@/lib/utils';
 import type { Task } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
 import { formatDate } from '@/lib/utils';
