@@ -50,7 +50,15 @@ class Document(Base):
     )
     processed_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True), nullable=True)
 
+    client_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        sa.ForeignKey("clients.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+
     organization: Mapped["Organization"] = relationship("Organization", back_populates="documents")  # noqa: F821
     uploader: Mapped["User"] = relationship(  # noqa: F821
         "User", back_populates="documents", foreign_keys=[uploaded_by]
     )
+    client: Mapped["Client"] = relationship("Client", back_populates="documents")  # noqa: F821

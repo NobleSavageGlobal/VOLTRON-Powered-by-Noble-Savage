@@ -44,6 +44,12 @@ class Task(Base):
     completed_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True), nullable=True)
     source: Mapped[str] = mapped_column(sa.String(50), nullable=False, default="manual")
     metadata_: Mapped[dict | None] = mapped_column("metadata", _json_col(), nullable=True)
+    client_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        sa.ForeignKey("clients.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
     )
@@ -61,3 +67,4 @@ class Task(Base):
     assignee: Mapped["User"] = relationship(  # noqa: F821
         "User", back_populates="assigned_tasks", foreign_keys=[assigned_to]
     )
+    client: Mapped["Client"] = relationship("Client", back_populates="tasks")  # noqa: F821

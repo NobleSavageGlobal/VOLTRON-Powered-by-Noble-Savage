@@ -38,3 +38,4 @@ class Organization(Base):
     users: Mapped[list["User"]] = relationship("User", back_populates="organization")  # noqa: F821
     documents: Mapped[list["Document"]] = relationship("Document", back_populates="organization")  # noqa: F821
     tasks: Mapped[list["Task"]] = relationship("Task", back_populates="organization")  # noqa: F821
+    clients: Mapped[list["Client"]] = relationship("Client", back_populates="org")  # noqa: F821
