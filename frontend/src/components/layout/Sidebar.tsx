@@ -10,6 +10,7 @@ import {
   LogOut,
   Settings,
   Shield,
+  Users,
   Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -18,6 +19,7 @@ import { useRouter } from 'next/navigation';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/clients', label: 'Clients', icon: Users },
   { href: '/documents', label: 'Documents', icon: FileText },
   { href: '/tasks', label: 'Tasks', icon: CheckSquare },
   { href: '/knowledge', label: 'Knowledge Vault', icon: Database },

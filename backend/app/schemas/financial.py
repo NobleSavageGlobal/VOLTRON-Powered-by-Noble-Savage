@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict
 
 
 class FinancialConnectionCreate(BaseModel):
+    client_id: uuid.UUID
     provider: str
     account_mask: str | None = None
 

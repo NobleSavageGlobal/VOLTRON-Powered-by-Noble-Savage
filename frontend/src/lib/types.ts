@@ -11,6 +11,8 @@ export type DocumentType =
 export type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'review' | 'done';
 export type TaskPriority = 'critical' | 'high' | 'medium' | 'low';
 export type TaskSource = 'manual' | 'ai_generated' | 'automation';
+export type ClientStatus = 'active' | 'inactive';
+export type ClientEntityType = 'person' | 'business' | 'trust' | 'other';
 
 export interface User {
   id: string;
@@ -103,4 +105,17 @@ export interface PaginatedResponse<T> {
 
 export interface ApiError {
   detail: string;
+}
+
+export interface Client {
+  id: string;
+  org_id: string;
+  display_name: string;
+  entity_type: ClientEntityType;
+  industry: string | null;
+  annual_revenue_range: string | null;
+  profile_json: Record<string, unknown> | null;
+  status: ClientStatus;
+  created_at: string;
+  updated_at: string;
 }

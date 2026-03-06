@@ -1,5 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import type {
+  Client,
   Document,
   Organization,
   PaginatedResponse,
@@ -190,6 +191,34 @@ export const tasksApi = {
   ) => apiClient.patch<Task>(`/tasks/${id}`, data),
 
   delete: (id: string) => apiClient.delete(`/tasks/${id}`),
+};
+
+// Clients
+export const clientsApi = {
+  list: (params?: { status?: string; limit?: number; offset?: number }) =>
+    apiClient.get<Client[]>('/clients/', { params }),
+
+  create: (data: {
+    display_name: string;
+    entity_type?: string;
+    industry?: string;
+    annual_revenue_range?: string;
+  }) => apiClient.post<Client>('/clients/', data),
+
+  get: (id: string) => apiClient.get<Client>(`/clients/${id}`),
+
+  update: (
+    id: string,
+    data: {
+      display_name?: string;
+      entity_type?: string;
+      industry?: string;
+      annual_revenue_range?: string;
+      status?: string;
+    }
+  ) => apiClient.patch<Client>(`/clients/${id}`, data),
+
+  delete: (id: string) => apiClient.delete(`/clients/${id}`),
 };
 
 // Organizations
