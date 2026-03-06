@@ -1,0 +1,46 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    // ─── Backend debugger ─────────────────────────────────────────────────────
+    {
+      "name": "🐍 Debug: FastAPI Backend",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"],
+      "cwd": "${workspaceFolder}/backend",
+      "envFile": "${workspaceFolder}/backend/.env",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "autoReload": { "enable": true }
+    },
+    // ─── Frontend dev server ──────────────────────────────────────────────────
+    {
+      "name": "🌐 Start: Next.js Frontend",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}/frontend",
+      "envFile": "${workspaceFolder}/frontend/.env.local",
+      "console": "integratedTerminal",
+      "serverReadyAction": {
+        "pattern": "Local:\\s+(https?://\\S+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      }
+    },
+    // ─── Compound: both at once ───────────────────────────────────────────────
+    {
+      "name": "🚀 Full Stack (Backend + Frontend)",
+      "configurations": ["🐍 Debug: FastAPI Backend", "🌐 Start: Next.js Frontend"]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "🚀 Full Stack (Backend + Frontend)",
+      "configurations": ["🐍 Debug: FastAPI Backend", "🌐 Start: Next.js Frontend"],
+      "stopAll": true
+    }
+  ]
+}

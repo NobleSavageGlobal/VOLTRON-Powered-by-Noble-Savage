@@ -37,7 +37,7 @@ infrastructure/.terraform.lock.hcl
 
 # IDE
 .idea/
-.vscode/
+# .vscode/ is intentionally committed — it contains the launch/task config for running the app
 *.swp
 *.swo
 
