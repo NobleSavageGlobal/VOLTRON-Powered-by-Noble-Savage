@@ -10,6 +10,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 
+def _json_col():
+    """Use JSONB on PostgreSQL, JSON on other DBs (e.g. SQLite for tests)."""
+    return sa.JSON().with_variant(JSONB(), "postgresql")
+
+
 class Organization(Base):
     __tablename__ = "organizations"
 
@@ -28,7 +33,7 @@ class Organization(Base):
         onupdate=sa.func.now(),
         nullable=False,
     )
-    settings: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    settings: Mapped[dict] = mapped_column(_json_col(), nullable=False, default=dict)
 
     users: Mapped[list["User"]] = relationship("User", back_populates="organization")  # noqa: F821
     documents: Mapped[list["Document"]] = relationship("Document", back_populates="organization")  # noqa: F821

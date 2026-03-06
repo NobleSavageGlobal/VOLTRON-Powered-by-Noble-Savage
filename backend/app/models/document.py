@@ -10,6 +10,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 
+def _json_col():
+    return sa.JSON().with_variant(JSONB(), "postgresql")
+
+
 class Document(Base):
     __tablename__ = "documents"
 
@@ -34,12 +38,12 @@ class Document(Base):
     mime_type: Mapped[str] = mapped_column(sa.String(256), nullable=False)
     status: Mapped[str] = mapped_column(sa.String(50), nullable=False, default="pending", index=True)
     doc_type: Mapped[str] = mapped_column(sa.String(100), nullable=False, default="other", index=True)
-    extracted_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    extracted_data: Mapped[dict | None] = mapped_column(_json_col(), nullable=True)
     confidence_score: Mapped[float | None] = mapped_column(sa.Float, nullable=True)
     ai_summary: Mapped[str | None] = mapped_column(sa.Text, nullable=True)
-    key_dates: Mapped[list | None] = mapped_column(JSONB, nullable=True)
-    risks: Mapped[list | None] = mapped_column(JSONB, nullable=True)
-    opportunities: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    key_dates: Mapped[list | None] = mapped_column(_json_col(), nullable=True)
+    risks: Mapped[list | None] = mapped_column(_json_col(), nullable=True)
+    opportunities: Mapped[list | None] = mapped_column(_json_col(), nullable=True)
     notes: Mapped[str | None] = mapped_column(sa.Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False

@@ -10,6 +10,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 
+def _json_col():
+    return sa.JSON().with_variant(JSONB(), "postgresql")
+
+
 class Task(Base):
     __tablename__ = "tasks"
 
@@ -39,7 +43,7 @@ class Task(Base):
     due_date: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True), nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True), nullable=True)
     source: Mapped[str] = mapped_column(sa.String(50), nullable=False, default="manual")
-    metadata_: Mapped[dict | None] = mapped_column("metadata", JSONB, nullable=True)
+    metadata_: Mapped[dict | None] = mapped_column("metadata", _json_col(), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
     )

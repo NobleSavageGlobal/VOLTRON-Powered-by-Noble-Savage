@@ -10,6 +10,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 
+def _json_col():
+    return sa.JSON().with_variant(JSONB(), "postgresql")
+
+
 class AuditLog(Base):
     __tablename__ = "audit_logs"
 
@@ -25,7 +29,7 @@ class AuditLog(Base):
     action: Mapped[str] = mapped_column(sa.String(256), nullable=False, index=True)
     resource_type: Mapped[str] = mapped_column(sa.String(100), nullable=False)
     resource_id: Mapped[str | None] = mapped_column(sa.String(256), nullable=True)
-    details: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    details: Mapped[dict | None] = mapped_column(_json_col(), nullable=True)
     ip_address: Mapped[str | None] = mapped_column(sa.String(45), nullable=True)
     timestamp: Mapped[datetime] = mapped_column(
         sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False, index=True

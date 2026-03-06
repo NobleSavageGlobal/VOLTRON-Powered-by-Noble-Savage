@@ -97,7 +97,13 @@ async def refresh_token(payload: RefreshTokenRequest, db: DB) -> TokenResponse:
         raise UnauthorizedError("Invalid token type")
 
     user_id = token_data.get("sub")
-    result = await db.execute(select(User).where(User.id == user_id))
+    try:
+        user_uuid = uuid.UUID(user_id) if user_id else None
+    except ValueError:
+        raise UnauthorizedError("Invalid token payload")
+    if not user_uuid:
+        raise UnauthorizedError("Invalid token payload")
+    result = await db.execute(select(User).where(User.id == user_uuid))
     user = result.scalar_one_or_none()
 
     if not user or not user.is_active:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from typing import Annotated
 
 from fastapi import Depends, Request
@@ -31,8 +32,13 @@ async def get_current_user(
     if payload.get("type") != "access":
         raise UnauthorizedError("Invalid token type")
 
-    user_id = payload.get("sub")
-    if not user_id:
+    user_id_str = payload.get("sub")
+    if not user_id_str:
+        raise UnauthorizedError("Invalid token payload")
+
+    try:
+        user_id = uuid.UUID(user_id_str)
+    except ValueError:
         raise UnauthorizedError("Invalid token payload")
 
     result = await db.execute(select(User).where(User.id == user_id))
