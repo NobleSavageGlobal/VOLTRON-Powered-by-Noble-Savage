@@ -1,0 +1,15 @@
+{
+  "name": "VOLTRON Development Container",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "settings": {
+    "editor.formatOnSave": true
+  },
+  "extensions": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-toolsai.jupyter"
+  ],
+  "postCreateCommand": "pip install -r requirements.txt"
+}
