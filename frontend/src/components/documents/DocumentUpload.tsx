@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, FileText, X } from "lucide-react";
+import { Upload, FileText, X, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn, formatFileSize } from "@/lib/utils";
 import { useBatchUploadDocuments } from "@/hooks/useDocuments";
 import { useClients } from "@/hooks/useClients";
@@ -201,16 +201,81 @@ export function DocumentUpload({
           </Button>
 
           {results.length > 0 && (
-            <div className="rounded-lg border border-slate-700 bg-slate-900/70 p-3">
-              <p className="text-sm text-slate-200">
+            <div className="rounded-lg border border-slate-700 bg-slate-900/70 p-3 space-y-3">
+              <p className="text-sm font-medium text-slate-200">
                 Completed: {successCount} success, {failureCount} failed
               </p>
               {failureCount > 0 && (
-                <p className="text-xs text-red-400 mt-1">
+                <p className="text-xs text-red-400">
                   Failed files can be corrected and re-uploaded without redoing
                   successful uploads.
                 </p>
               )}
+              <div className="space-y-2">
+                {results.map((r, i) => {
+                  const d = r.document;
+                  return (
+                    <div
+                      key={`result-${i}`}
+                      className={cn(
+                        "flex items-start gap-3 p-2 rounded-lg text-xs",
+                        r.success
+                          ? "bg-emerald-900/20 border border-emerald-800/30"
+                          : "bg-red-900/20 border border-red-800/30",
+                      )}
+                    >
+                      {r.success ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-slate-200 font-medium truncate">
+                          {r.filename}
+                        </p>
+                        {r.success && d && (
+                          <div className="flex flex-wrap items-center gap-2 mt-1">
+                            <span className="text-indigo-400 font-medium">
+                              {d.doc_type !== "other"
+                                ? d.doc_type
+                                    .replace(/_/g, " ")
+                                    .replace(/\b\w/g, (c) => c.toUpperCase())
+                                : "Unclassified"}
+                            </span>
+                            {d.confidence_score !== null && (
+                              <>
+                                <span className="text-slate-600">·</span>
+                                <span className="text-slate-400">
+                                  {Math.round(d.confidence_score * 100)}%
+                                  confidence
+                                </span>
+                              </>
+                            )}
+                            {d.extracted_data?.candidate_client_name && (
+                              <>
+                                <span className="text-slate-600">·</span>
+                                <span className="text-emerald-400">
+                                  {String(
+                                    d.extracted_data.candidate_client_name,
+                                  )}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        )}
+                        {r.success && d?.ai_summary && (
+                          <p className="text-slate-500 mt-1 line-clamp-1">
+                            {d.ai_summary}
+                          </p>
+                        )}
+                        {!r.success && r.error && (
+                          <p className="text-red-400 mt-0.5">{r.error}</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

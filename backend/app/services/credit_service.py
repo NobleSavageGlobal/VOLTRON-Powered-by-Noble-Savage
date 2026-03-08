@@ -8,7 +8,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import NotFoundError
 from app.core.logging import get_logger
-from app.models.credit import Collection, CreditReport, Dispute, DisputeLetter, Tradeline
+from app.models.credit import (
+    Collection,
+    CreditReport,
+    Dispute,
+    DisputeLetter,
+    Tradeline,
+)
 
 logger = get_logger(__name__)
 
@@ -31,20 +37,29 @@ class CreditService:
         await db.refresh(report)
         return report
 
-    async def get_credit_reports(self, db: AsyncSession, client_id: uuid.UUID) -> list[CreditReport]:
+    async def get_credit_reports(
+        self, db: AsyncSession, client_id: uuid.UUID
+    ) -> list[CreditReport]:
         result = await db.execute(
-            select(CreditReport).where(CreditReport.client_id == client_id).order_by(CreditReport.created_at.desc())
+            select(CreditReport)
+            .where(CreditReport.client_id == client_id)
+            .order_by(CreditReport.created_at.desc())
         )
         return list(result.scalars().all())
 
-    async def create_dispute(self, db: AsyncSession, client_id: uuid.UUID, data: dict) -> Dispute:
+    async def create_dispute(
+        self, db: AsyncSession, client_id: uuid.UUID, data: dict
+    ) -> Dispute:
+        data.pop("client_id", None)
         dispute = Dispute(client_id=client_id, **data)
         db.add(dispute)
         await db.flush()
         await db.refresh(dispute)
         return dispute
 
-    async def update_dispute(self, db: AsyncSession, dispute_id: uuid.UUID, data: dict) -> Dispute:
+    async def update_dispute(
+        self, db: AsyncSession, dispute_id: uuid.UUID, data: dict
+    ) -> Dispute:
         result = await db.execute(select(Dispute).where(Dispute.id == dispute_id))
         dispute = result.scalar_one_or_none()
         if not dispute:
@@ -56,9 +71,13 @@ class CreditService:
         await db.refresh(dispute)
         return dispute
 
-    async def list_disputes(self, db: AsyncSession, client_id: uuid.UUID) -> list[Dispute]:
+    async def list_disputes(
+        self, db: AsyncSession, client_id: uuid.UUID
+    ) -> list[Dispute]:
         result = await db.execute(
-            select(Dispute).where(Dispute.client_id == client_id).order_by(Dispute.created_at.desc())
+            select(Dispute)
+            .where(Dispute.client_id == client_id)
+            .order_by(Dispute.created_at.desc())
         )
         return list(result.scalars().all())
 
@@ -88,10 +107,16 @@ class CreditService:
         await db.refresh(letter)
         return letter
 
-    async def get_credit_health_factors(self, db: AsyncSession, client_id: uuid.UUID) -> dict:
+    async def get_credit_health_factors(
+        self, db: AsyncSession, client_id: uuid.UUID
+    ) -> dict:
         reports = await self.get_credit_reports(db, client_id)
         if not reports:
-            return {"derogatory_count": 0, "utilization_avg": 0.0, "collection_total": 0.0}
+            return {
+                "derogatory_count": 0,
+                "utilization_avg": 0.0,
+                "collection_total": 0.0,
+            }
 
         latest = reports[0]
         tl_result = await db.execute(
@@ -103,7 +128,11 @@ class CreditService:
         )
         collections = list(coll_result.scalars().all())
 
-        derogatory = sum(1 for t in tradelines if t.payment_status and "derog" in t.payment_status.lower())
+        derogatory = sum(
+            1
+            for t in tradelines
+            if t.payment_status and "derog" in t.payment_status.lower()
+        )
         utils = [float(t.utilization) for t in tradelines if t.utilization is not None]
         utilization_avg = sum(utils) / len(utils) if utils else 0.0
         collection_total = float(sum(Decimal(str(c.amount or 0)) for c in collections))
@@ -113,5 +142,6 @@ class CreditService:
             "utilization_avg": utilization_avg,
             "collection_total": collection_total,
         }
+
 
 credit_service = CreditService()

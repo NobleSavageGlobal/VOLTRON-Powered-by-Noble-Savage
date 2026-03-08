@@ -42,7 +42,9 @@ class FinancialService:
         await db.refresh(conn)
         return conn
 
-    async def simulate_plaid_sync(self, db: AsyncSession, connection_id: uuid.UUID) -> dict:
+    async def simulate_plaid_sync(
+        self, db: AsyncSession, connection_id: uuid.UUID
+    ) -> dict:
         result = await db.execute(
             select(FinancialConnection).where(FinancialConnection.id == connection_id)
         )
@@ -88,7 +90,10 @@ class FinancialService:
 
         conn.last_synced_at = datetime.now(timezone.utc)
         await db.flush()
-        return {"transactions_created": transactions_created, "connection_id": str(connection_id)}
+        return {
+            "transactions_created": transactions_created,
+            "connection_id": str(connection_id),
+        }
 
     async def get_transactions(
         self, db: AsyncSession, client_id: uuid.UUID, limit: int = 50, offset: int = 0
@@ -96,7 +101,10 @@ class FinancialService:
         stmt = (
             select(Transaction)
             .join(FinancialAccount, Transaction.account_id == FinancialAccount.id)
-            .join(FinancialConnection, FinancialAccount.connection_id == FinancialConnection.id)
+            .join(
+                FinancialConnection,
+                FinancialAccount.connection_id == FinancialConnection.id,
+            )
             .where(FinancialConnection.client_id == client_id)
             .order_by(Transaction.posted_at.desc())
             .limit(limit)
@@ -111,9 +119,17 @@ class FinancialService:
         transactions = await self.get_transactions(db, client_id, limit=1000)
         monthly: dict[str, dict] = {}
         for txn in transactions:
-            key = txn.posted_at.strftime("%Y-%m-01") if hasattr(txn.posted_at, "strftime") else str(txn.posted_at)[:7] + "-01"
+            key = (
+                txn.posted_at.strftime("%Y-%m-01")
+                if hasattr(txn.posted_at, "strftime")
+                else str(txn.posted_at)[:7] + "-01"
+            )
             if key not in monthly:
-                monthly[key] = {"income": Decimal("0"), "expense": Decimal("0"), "breakdown": {}}
+                monthly[key] = {
+                    "income": Decimal("0"),
+                    "expense": Decimal("0"),
+                    "breakdown": {},
+                }
             amt = Decimal(str(txn.amount))
             if txn.transaction_type == "credit":
                 monthly[key]["income"] += amt
@@ -153,7 +169,9 @@ class FinancialService:
             rollups.append(rollup)
         return rollups
 
-    async def get_financial_summary(self, db: AsyncSession, client_id: uuid.UUID) -> dict:
+    async def get_financial_summary(
+        self, db: AsyncSession, client_id: uuid.UUID
+    ) -> dict:
         rollups = await self.compute_monthly_rollups(db, client_id)
         recent = sorted(rollups, key=lambda r: str(r.period_month), reverse=True)[:3]
         total_income = sum(float(r.income_total) for r in recent)
@@ -176,16 +194,20 @@ class FinancialService:
     async def create_obligation(
         self, db: AsyncSession, client_id: uuid.UUID, data: dict
     ) -> Obligation:
+        data.pop("client_id", None)
         ob = Obligation(client_id=client_id, **data)
         db.add(ob)
         await db.flush()
         await db.refresh(ob)
         return ob
 
-    async def list_obligations(self, db: AsyncSession, client_id: uuid.UUID) -> list[Obligation]:
+    async def list_obligations(
+        self, db: AsyncSession, client_id: uuid.UUID
+    ) -> list[Obligation]:
         result = await db.execute(
             select(Obligation).where(Obligation.client_id == client_id)
         )
         return list(result.scalars().all())
+
 
 financial_service = FinancialService()
