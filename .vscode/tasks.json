@@ -1,0 +1,128 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    // ─── Installation ─────────────────────────────────────────────────────────
+    {
+      "label": "Install: Backend dependencies",
+      "type": "shell",
+      "command": "pip install -r requirements.txt -r requirements-dev.txt",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated", "showReuseMessage": false }
+    },
+    {
+      "label": "Install: Frontend dependencies",
+      "type": "shell",
+      "command": "npm install",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated", "showReuseMessage": false }
+    },
+    // ─── Environment setup ────────────────────────────────────────────────────
+    {
+      "label": "Setup: Copy backend .env",
+      "type": "shell",
+      "command": "[ -f .env ] || cp .env.example .env && echo '.env ready'",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "presentation": { "reveal": "silent", "panel": "shared" },
+      "windows": {
+        "command": "if not exist .env copy .env.example .env & echo .env ready"
+      }
+    },
+    {
+      "label": "Setup: Copy frontend .env.local",
+      "type": "shell",
+      "command": "[ -f .env.local ] || cp .env.local.example .env.local && echo '.env.local ready'",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "presentation": { "reveal": "silent", "panel": "shared" },
+      "windows": {
+        "command": "if not exist .env.local copy .env.local.example .env.local & echo .env.local ready"
+      }
+    },
+    // ─── Servers ──────────────────────────────────────────────────────────────
+    {
+      "label": "Start: Backend (FastAPI)",
+      "type": "shell",
+      "command": "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "fastapi",
+        "pattern": { "regexp": "^(.*)$", "file": 1, "location": 2, "message": 3 },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^INFO.*Uvicorn running",
+          "endsPattern": "^INFO.*Application startup complete"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "servers",
+        "showReuseMessage": false,
+        "clear": true
+      }
+    },
+    {
+      "label": "Start: Frontend (Next.js)",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "nextjs",
+        "pattern": { "regexp": "^(.*)$", "file": 1, "location": 2, "message": 3 },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*Next\\.js",
+          "endsPattern": "^.*Ready in"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "servers",
+        "showReuseMessage": false,
+        "clear": true
+      }
+    },
+    // ─── Compound: start everything ───────────────────────────────────────────
+    {
+      "label": "🚀 Start: Full Stack (Backend + Frontend)",
+      "dependsOn": [
+        "Setup: Copy backend .env",
+        "Setup: Copy frontend .env.local",
+        "Start: Backend (FastAPI)",
+        "Start: Frontend (Next.js)"
+      ],
+      "dependsOrder": "sequence",
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "shared", "showReuseMessage": false }
+    },
+    // ─── Tests ────────────────────────────────────────────────────────────────
+    {
+      "label": "Test: Backend (pytest)",
+      "type": "shell",
+      "command": "python -m pytest tests/ -v --tb=short",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "group": { "kind": "test", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "dedicated", "showReuseMessage": false }
+    },
+    {
+      "label": "Test: Frontend (lint)",
+      "type": "shell",
+      "command": "npm run lint",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "dedicated", "showReuseMessage": false }
+    },
+    // ─── Docker ───────────────────────────────────────────────────────────────
+    {
+      "label": "Docker: Start full stack",
+      "type": "shell",
+      "command": "docker compose up --build",
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always", "panel": "dedicated", "showReuseMessage": false }
+    }
+  ]
+}
