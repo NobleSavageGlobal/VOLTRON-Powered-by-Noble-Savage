@@ -1,14 +1,19 @@
-'use client';
+"use client";
 
-import { Calendar, AlertTriangle, Lightbulb, Database } from 'lucide-react';
-import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
-import type { Document } from '@/lib/types';
+import { Calendar, AlertTriangle, Lightbulb, Database } from "lucide-react";
+import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
+import type { Document } from "@/lib/types";
 
 interface ExtractedDataViewProps {
   document: Document;
 }
 
 export function ExtractedDataView({ document: doc }: ExtractedDataViewProps) {
+  const onboardingHint =
+    doc.extracted_data && typeof doc.extracted_data.onboarding_hint === "object"
+      ? (doc.extracted_data.onboarding_hint as Record<string, unknown>)
+      : null;
+
   return (
     <div className="space-y-4">
       {/* AI Summary */}
@@ -17,7 +22,9 @@ export function ExtractedDataView({ document: doc }: ExtractedDataViewProps) {
           <CardHeader>
             <CardTitle>AI Summary</CardTitle>
           </CardHeader>
-          <p className="text-sm text-slate-300 leading-relaxed">{doc.ai_summary}</p>
+          <p className="text-sm text-slate-300 leading-relaxed">
+            {doc.ai_summary}
+          </p>
         </Card>
       )}
 
@@ -33,7 +40,9 @@ export function ExtractedDataView({ document: doc }: ExtractedDataViewProps) {
           <div className="space-y-2">
             {doc.key_dates.map((kd, i) => (
               <div key={i} className="flex items-start gap-3 text-sm">
-                <span className="font-mono text-indigo-300 flex-shrink-0">{kd.date}</span>
+                <span className="font-mono text-indigo-300 flex-shrink-0">
+                  {kd.date}
+                </span>
                 <span className="text-slate-400">{kd.description}</span>
               </div>
             ))}
@@ -52,7 +61,10 @@ export function ExtractedDataView({ document: doc }: ExtractedDataViewProps) {
           </CardHeader>
           <ul className="space-y-2">
             {doc.risks.map((risk, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+              <li
+                key={i}
+                className="flex items-start gap-2 text-sm text-slate-300"
+              >
                 <span className="w-1.5 h-1.5 mt-1.5 rounded-full bg-amber-500 flex-shrink-0" />
                 {risk}
               </li>
@@ -72,7 +84,10 @@ export function ExtractedDataView({ document: doc }: ExtractedDataViewProps) {
           </CardHeader>
           <ul className="space-y-2">
             {doc.opportunities.map((opp, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+              <li
+                key={i}
+                className="flex items-start gap-2 text-sm text-slate-300"
+              >
                 <span className="w-1.5 h-1.5 mt-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
                 {opp}
               </li>
@@ -94,11 +109,45 @@ export function ExtractedDataView({ document: doc }: ExtractedDataViewProps) {
             {Object.entries(doc.extracted_data).map(([key, val]) => (
               <div key={key} className="flex gap-3 text-sm">
                 <span className="text-slate-400 capitalize flex-shrink-0 w-32 truncate">
-                  {key.replace(/_/g, ' ')}
+                  {key.replace(/_/g, " ")}
                 </span>
                 <span className="text-slate-200">{String(val)}</span>
               </div>
             ))}
+          </div>
+        </Card>
+      )}
+
+      {onboardingHint && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Onboarding Suggestions</CardTitle>
+          </CardHeader>
+          <div className="space-y-2 text-sm">
+            <div className="flex gap-3">
+              <span className="text-slate-400 w-36">Display name</span>
+              <span className="text-slate-200">
+                {String(onboardingHint.display_name ?? "")}
+              </span>
+            </div>
+            <div className="flex gap-3">
+              <span className="text-slate-400 w-36">Entity type</span>
+              <span className="text-slate-200">
+                {String(onboardingHint.entity_type ?? "")}
+              </span>
+            </div>
+            <div className="flex gap-3">
+              <span className="text-slate-400 w-36">Industry</span>
+              <span className="text-slate-200">
+                {String(onboardingHint.industry ?? "")}
+              </span>
+            </div>
+            <div className="flex gap-3">
+              <span className="text-slate-400 w-36">Revenue range</span>
+              <span className="text-slate-200">
+                {String(onboardingHint.annual_revenue_range ?? "")}
+              </span>
+            </div>
           </div>
         </Card>
       )}

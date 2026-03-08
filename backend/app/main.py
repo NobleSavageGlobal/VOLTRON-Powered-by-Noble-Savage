@@ -34,6 +34,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=r"https://.*\.app\.github\.dev",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -58,4 +59,8 @@ app.include_router(router)
 
 @app.get("/health")
 async def health_check() -> dict:
-    return {"status": "ok", "service": settings.APP_NAME, "environment": settings.ENVIRONMENT}
+    return {
+        "status": "ok",
+        "service": settings.APP_NAME,
+        "environment": settings.ENVIRONMENT,
+    }

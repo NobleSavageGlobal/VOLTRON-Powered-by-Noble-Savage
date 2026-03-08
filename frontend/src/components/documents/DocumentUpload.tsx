@@ -1,38 +1,53 @@
-'use client';
+"use client";
 
-import { useCallback, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { Upload, FileText, X } from 'lucide-react';
-import { cn, formatFileSize } from '@/lib/utils';
-import { useUploadDocument } from '@/hooks/useDocuments';
-import { Spinner } from '@/components/ui/Spinner';
-import { Button } from '@/components/ui/Button';
+import { useCallback, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { Upload, FileText, X } from "lucide-react";
+import { cn, formatFileSize } from "@/lib/utils";
+import { useBatchUploadDocuments } from "@/hooks/useDocuments";
+import { useClients } from "@/hooks/useClients";
+import { Spinner } from "@/components/ui/Spinner";
+import { Button } from "@/components/ui/Button";
+import type { DocumentUploadResult } from "@/lib/types";
 
 interface DocumentUploadProps {
   onSuccess?: () => void;
+  defaultAutoOnboard?: boolean;
+  lockAutoOnboard?: boolean;
 }
 
-export function DocumentUpload({ onSuccess }: DocumentUploadProps) {
+export function DocumentUpload({
+  onSuccess,
+  defaultAutoOnboard = false,
+  lockAutoOnboard = false,
+}: DocumentUploadProps) {
   const [files, setFiles] = useState<File[]>([]);
-  const { mutateAsync: upload, isPending } = useUploadDocument();
+  const { mutateAsync: uploadBatch, isPending } = useBatchUploadDocuments();
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [results, setResults] = useState<DocumentUploadResult[]>([]);
+  const [autoOnboard, setAutoOnboard] = useState(defaultAutoOnboard);
+  const [selectedClientId, setSelectedClientId] = useState("");
+  const { data: clients } = useClients({ status: "active", limit: 200 });
 
-  const onDrop = useCallback(
-    (accepted: File[]) => {
-      setFiles((prev) => [...prev, ...accepted.slice(0, 10 - prev.length)]);
-    },
-    []
-  );
+  const onDrop = useCallback((accepted: File[]) => {
+    setResults([]);
+    setFiles((prev) => [...prev, ...accepted.slice(0, 10 - prev.length)]);
+  }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'application/pdf': ['.pdf'],
-      'image/jpeg': ['.jpg', '.jpeg'],
-      'image/png': ['.png'],
-      'image/tiff': ['.tiff', '.tif'],
-      'application/msword': ['.doc'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      "application/pdf": [".pdf"],
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+      "image/tiff": [".tiff", ".tif"],
+      "image/webp": [".webp"],
+      "image/bmp": [".bmp"],
+      "application/msword": [".doc"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"],
+      "text/plain": [".txt"],
+      "text/csv": [".csv"],
     },
     maxSize: 50 * 1024 * 1024,
     disabled: isPending,
@@ -48,30 +63,43 @@ export function DocumentUpload({ onSuccess }: DocumentUploadProps) {
   };
 
   const handleUpload = async () => {
+    if (files.length === 0) return;
+
     const newErrors: Record<string, string> = {};
-    const results = await Promise.allSettled(files.map((f) => upload(f)));
-    results.forEach((result, i) => {
-      if (result.status === 'rejected') {
-        newErrors[i] = 'Upload failed';
+    const response = await uploadBatch({
+      files,
+      autoOnboard,
+      clientId: selectedClientId || undefined,
+    });
+
+    response.items.forEach((result, i) => {
+      if (!result.success) {
+        newErrors[i] = result.error || "Upload failed";
       }
     });
+
+    setResults(response.items);
     setErrors(newErrors);
-    if (Object.keys(newErrors).length === 0) {
+
+    if (response.failure_count === 0) {
       setFiles([]);
       onSuccess?.();
     }
   };
+
+  const successCount = results.filter((item) => item.success).length;
+  const failureCount = results.filter((item) => !item.success).length;
 
   return (
     <div className="space-y-4">
       <div
         {...getRootProps()}
         className={cn(
-          'border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition',
+          "border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition",
           isDragActive
-            ? 'border-indigo-500 bg-indigo-500/10'
-            : 'border-slate-600 hover:border-indigo-500/60 hover:bg-slate-800/50',
-          isPending && 'opacity-50 cursor-not-allowed'
+            ? "border-indigo-500 bg-indigo-500/10"
+            : "border-slate-600 hover:border-indigo-500/60 hover:bg-slate-800/50",
+          isPending && "opacity-50 cursor-not-allowed",
         )}
       >
         <input {...getInputProps()} />
@@ -81,10 +109,10 @@ export function DocumentUpload({ onSuccess }: DocumentUploadProps) {
           </div>
           <div>
             <p className="text-sm font-medium text-slate-200">
-              {isDragActive ? 'Drop files here' : 'Drag & drop documents'}
+              {isDragActive ? "Drop files here" : "Drag & drop documents"}
             </p>
             <p className="text-xs text-slate-500 mt-1">
-              PDF, JPEG, PNG, TIFF, DOC, DOCX — up to 50MB each
+              PDF, images, DOC/DOCX, TXT/CSV - up to 50MB each
             </p>
           </div>
           <Button variant="secondary" size="sm" type="button">
@@ -95,6 +123,40 @@ export function DocumentUpload({ onSuccess }: DocumentUploadProps) {
 
       {files.length > 0 && (
         <div className="space-y-2">
+          <div className="rounded-lg border border-slate-700 bg-slate-900/70 p-3 space-y-3">
+            <label className="flex items-center gap-2 text-sm text-slate-300">
+              <input
+                type="checkbox"
+                checked={autoOnboard}
+                disabled={lockAutoOnboard || isPending}
+                onChange={(e) => setAutoOnboard(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-indigo-500"
+              />
+              Auto-populate client onboarding from extracted document fields
+            </label>
+
+            {autoOnboard && (
+              <div>
+                <label className="block text-xs text-slate-400 mb-1">
+                  Attach to existing client (optional)
+                </label>
+                <select
+                  value={selectedClientId}
+                  onChange={(e) => setSelectedClientId(e.target.value)}
+                  disabled={isPending}
+                  className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="">Create client from upload data</option>
+                  {(clients ?? []).map((client) => (
+                    <option key={client.id} value={client.id}>
+                      {client.display_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+
           {files.map((file, i) => (
             <div
               key={`${file.name}-${i}`}
@@ -103,8 +165,12 @@ export function DocumentUpload({ onSuccess }: DocumentUploadProps) {
               <FileText className="w-4 h-4 text-indigo-400 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-slate-200 truncate">{file.name}</p>
-                <p className="text-xs text-slate-500">{formatFileSize(file.size)}</p>
-                {errors[i] && <p className="text-xs text-red-400">{errors[i]}</p>}
+                <p className="text-xs text-slate-500">
+                  {formatFileSize(file.size)}
+                </p>
+                {errors[i] && (
+                  <p className="text-xs text-red-400">{errors[i]}</p>
+                )}
               </div>
               {isPending ? (
                 <Spinner size="sm" />
@@ -127,12 +193,26 @@ export function DocumentUpload({ onSuccess }: DocumentUploadProps) {
             {isPending ? (
               <>
                 <Spinner size="sm" className="mr-2" />
-                Uploading...
+                Uploading and extracting...
               </>
             ) : (
-              `Upload ${files.length} file${files.length > 1 ? 's' : ''}`
+              `Upload ${files.length} file${files.length > 1 ? "s" : ""}`
             )}
           </Button>
+
+          {results.length > 0 && (
+            <div className="rounded-lg border border-slate-700 bg-slate-900/70 p-3">
+              <p className="text-sm text-slate-200">
+                Completed: {successCount} success, {failureCount} failed
+              </p>
+              {failureCount > 0 && (
+                <p className="text-xs text-red-400 mt-1">
+                  Failed files can be corrected and re-uploaded without redoing
+                  successful uploads.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Query
 
-from app.api.deps import get_current_user, get_db
-from app.models.user import User
-from app.schemas.automation import WorkflowCreate, WorkflowResponse, WorkflowRunResponse
+from app.api.deps import CurrentUser, DB
+from app.core.exceptions import ForbiddenError
+from app.schemas.automation import WorkflowCreate, WorkflowResponse, WorkflowRunResponse, WorkflowUpdate
 from app.services.automation_service import automation_service
 
 router = APIRouter(prefix="/automations", tags=["automations"])
@@ -15,55 +14,67 @@ router = APIRouter(prefix="/automations", tags=["automations"])
 
 @router.get("/workflows", response_model=list[WorkflowResponse])
 async def list_workflows(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
+    db: DB,
 ) -> list:
+    if not current_user.org_id:
+        raise ForbiddenError("You must belong to an organization")
     return await automation_service.list_workflows(db, current_user.org_id)
 
 
 @router.post("/workflows", response_model=WorkflowResponse, status_code=201)
 async def create_workflow(
     data: WorkflowCreate,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
+    db: DB,
 ) -> object:
+    if not current_user.org_id:
+        raise ForbiddenError("You must belong to an organization")
     return await automation_service.create_workflow(db, current_user.org_id, data.model_dump())
 
 
 @router.patch("/workflows/{workflow_id}", response_model=WorkflowResponse)
 async def update_workflow(
     workflow_id: uuid.UUID,
-    updates: dict,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    updates: WorkflowUpdate,
+    current_user: CurrentUser,
+    db: DB,
 ) -> object:
-    return await automation_service.update_workflow(db, workflow_id, current_user.org_id, updates)
+    if not current_user.org_id:
+        raise ForbiddenError("You must belong to an organization")
+    return await automation_service.update_workflow(db, workflow_id, current_user.org_id, updates.model_dump(exclude_unset=True))
 
 
 @router.post("/workflows/{workflow_id}/run", response_model=WorkflowRunResponse)
 async def run_workflow(
     workflow_id: uuid.UUID,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
+    db: DB,
 ) -> object:
+    if not current_user.org_id:
+        raise ForbiddenError("You must belong to an organization")
     return await automation_service.run_workflow(db, workflow_id, current_user.org_id)
 
 
 @router.get("/runs", response_model=list[WorkflowRunResponse])
 async def list_runs(
+    current_user: CurrentUser,
+    db: DB,
     limit: int = Query(50, le=200),
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ) -> list:
+    if not current_user.org_id:
+        raise ForbiddenError("You must belong to an organization")
     return await automation_service.get_workflow_runs(db, current_user.org_id, limit)
 
 
 @router.get("/events")
 async def list_events(
+    current_user: CurrentUser,
+    db: DB,
     limit: int = Query(50, le=200),
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ) -> list:
+    if not current_user.org_id:
+        raise ForbiddenError("You must belong to an organization")
     events = await automation_service.get_events(db, current_user.org_id, limit)
     return [
         {

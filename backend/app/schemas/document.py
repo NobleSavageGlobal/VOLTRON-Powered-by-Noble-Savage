@@ -6,11 +6,17 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict
 
-
-DocumentStatus = Literal["pending", "processing", "processed", "failed", "review_required"]
+DocumentStatus = Literal[
+    "pending", "processing", "processed", "failed", "review_required"
+]
 DocumentType = Literal[
-    "bank_statement", "tax_return", "contract", "invoice",
-    "credit_report", "government", "other"
+    "bank_statement",
+    "tax_return",
+    "contract",
+    "invoice",
+    "credit_report",
+    "government",
+    "other",
 ]
 
 
@@ -32,6 +38,7 @@ class DocumentResponse(DocumentBase):
 
     id: uuid.UUID
     org_id: uuid.UUID
+    client_id: uuid.UUID | None
     uploaded_by: uuid.UUID | None
     status: DocumentStatus
     doc_type: DocumentType
@@ -51,3 +58,16 @@ class DocumentListResponse(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class DocumentUploadResult(BaseModel):
+    filename: str
+    success: bool
+    document: DocumentResponse | None = None
+    error: str | None = None
+
+
+class DocumentBatchUploadResponse(BaseModel):
+    items: list[DocumentUploadResult]
+    success_count: int
+    failure_count: int

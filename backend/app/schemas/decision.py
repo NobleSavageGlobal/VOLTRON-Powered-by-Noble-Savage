@@ -31,6 +31,7 @@ class PlanActionUpdate(BaseModel):
 
 
 class DecisionPlanCreate(BaseModel):
+    client_id: uuid.UUID
     goal: str | None = None
     time_horizon_days: int | None = None
 

@@ -23,7 +23,18 @@ export function getAccessToken(): string | null {
 }
 
 export function isAuthenticated(): boolean {
-  return getAccessToken() !== null;
+  const token = getAccessToken();
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (payload.exp && payload.exp * 1000 < Date.now()) {
+      clearTokens();
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function fetchCurrentUser(): Promise<User | null> {

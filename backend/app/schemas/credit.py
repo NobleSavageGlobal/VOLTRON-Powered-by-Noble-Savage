@@ -51,6 +51,7 @@ class CollectionResponse(BaseModel):
 
 
 class DisputeCreate(BaseModel):
+    client_id: uuid.UUID
     bureau: str
     furnisher: str | None = None
     issue_type: str

@@ -14,6 +14,14 @@ class WorkflowCreate(BaseModel):
     actions: list[dict]
 
 
+class WorkflowUpdate(BaseModel):
+    name: str | None = None
+    trigger_type: str | None = None
+    trigger_config: dict | None = None
+    actions: list[dict] | None = None
+    status: str | None = None
+
+
 class WorkflowResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

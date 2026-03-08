@@ -66,6 +66,7 @@ class MonthlyRollupResponse(BaseModel):
 
 
 class ObligationCreate(BaseModel):
+    client_id: uuid.UUID
     obligation_type: str
     creditor_name: str | None = None
     principal: float | None = None

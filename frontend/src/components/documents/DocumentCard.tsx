@@ -1,12 +1,17 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { FileText, RefreshCw, Trash2 } from 'lucide-react';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { formatDate, formatFileSize, getDocTypeLabel, getStatusColor } from '@/lib/utils';
-import { useDeleteDocument, useReprocessDocument } from '@/hooks/useDocuments';
-import type { Document } from '@/lib/types';
+import Link from "next/link";
+import { FileText, RefreshCw, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import {
+  formatDate,
+  formatFileSize,
+  getDocTypeLabel,
+  getStatusColor,
+} from "@/lib/utils";
+import { useDeleteDocument, useReprocessDocument } from "@/hooks/useDocuments";
+import type { Document } from "@/lib/types";
 
 interface DocumentCardProps {
   document: Document;
@@ -14,7 +19,8 @@ interface DocumentCardProps {
 
 export function DocumentCard({ document: doc }: DocumentCardProps) {
   const { mutate: deleteDoc, isPending: isDeleting } = useDeleteDocument();
-  const { mutate: reprocess, isPending: isReprocessing } = useReprocessDocument();
+  const { mutate: reprocess, isPending: isReprocessing } =
+    useReprocessDocument();
 
   return (
     <div className="flex items-center gap-4 p-4 bg-slate-800/50 border border-slate-700 rounded-xl hover:bg-slate-800 transition">
@@ -23,15 +29,32 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
       </div>
 
       <div className="flex-1 min-w-0">
-        <Link href={`/documents/${doc.id}`} className="hover:text-indigo-400 transition">
-          <p className="text-sm font-medium text-slate-200 truncate">{doc.original_filename}</p>
+        <Link
+          href={`/documents/${doc.id}`}
+          className="hover:text-indigo-400 transition"
+        >
+          <p className="text-sm font-medium text-slate-200 truncate">
+            {doc.original_filename}
+          </p>
         </Link>
         <div className="flex items-center gap-2 mt-1">
-          <span className="text-xs text-slate-500">{getDocTypeLabel(doc.doc_type)}</span>
+          <span className="text-xs text-slate-500">
+            {getDocTypeLabel(doc.doc_type)}
+          </span>
           <span className="text-slate-600">·</span>
-          <span className="text-xs text-slate-500">{formatFileSize(doc.file_size)}</span>
+          <span className="text-xs text-slate-500">
+            {formatFileSize(doc.file_size)}
+          </span>
           <span className="text-slate-600">·</span>
-          <span className="text-xs text-slate-500">{formatDate(doc.created_at)}</span>
+          <span className="text-xs text-slate-500">
+            {formatDate(doc.created_at)}
+          </span>
+          {doc.client_id && (
+            <>
+              <span className="text-slate-600">·</span>
+              <span className="text-xs text-emerald-400">Client linked</span>
+            </>
+          )}
         </div>
       </div>
 
