@@ -1,0 +1,29 @@
+{
+  "recommendations": [
+    // Python / Backend
+    "ms-python.python",
+    "ms-python.pylance",
+    "ms-python.debugpy",
+    "ms-python.black-formatter",
+    "charliermarsh.ruff",
+
+    // JavaScript / Frontend
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "dsznajder.es7-react-js-snippets",
+
+    // General
+    "editorconfig.editorconfig",
+    "eamodio.gitlens",
+    "ms-vscode.vscode-typescript-next",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+
+    // REST testing
+    "humao.rest-client",
+
+    // Docker
+    "ms-azuretools.vscode-docker"
+  ]
+}
