@@ -251,7 +251,7 @@ export function DocumentUpload({
                                 </span>
                               </>
                             )}
-                            {d.extracted_data?.candidate_client_name && (
+                            {!!d.extracted_data?.candidate_client_name && (
                               <>
                                 <span className="text-slate-600">·</span>
                                 <span className="text-emerald-400">

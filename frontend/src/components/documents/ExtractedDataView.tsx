@@ -111,7 +111,7 @@ export function ExtractedDataView({ document: doc }: ExtractedDataViewProps) {
           </p>
           {extraction && (
             <div className="mt-3 pt-3 border-t border-slate-700/50 flex flex-wrap gap-3 text-xs text-slate-500">
-              {extraction.methods && (
+              {!!extraction.methods && (
                 <span>
                   Extraction: {(extraction.methods as string[]).join(", ")}
                 </span>
@@ -121,7 +121,7 @@ export function ExtractedDataView({ document: doc }: ExtractedDataViewProps) {
                   {extraction.text_length.toLocaleString()} chars extracted
                 </span>
               )}
-              {extraction.looks_low_quality && (
+              {!!extraction.looks_low_quality && (
                 <Badge
                   label="Low quality text"
                   colorClass="text-amber-400 bg-amber-400/10"
@@ -283,16 +283,16 @@ export function ExtractedDataView({ document: doc }: ExtractedDataViewProps) {
             <div className="flex items-center gap-2">
               <Badge
                 label={
-                  onboarding.auto_onboarded ? "Auto-onboarded" : "Not onboarded"
+                  !!onboarding.auto_onboarded ? "Auto-onboarded" : "Not onboarded"
                 }
                 colorClass={
-                  onboarding.auto_onboarded
+                  !!onboarding.auto_onboarded
                     ? "text-emerald-400 bg-emerald-400/10"
                     : "text-slate-400 bg-slate-400/10"
                 }
               />
             </div>
-            {onboarding.client_name && (
+            {!!onboarding.client_name && (
               <div className="flex gap-3">
                 <span className="text-slate-400 w-28">Client</span>
                 <span className="text-slate-200">
@@ -300,7 +300,7 @@ export function ExtractedDataView({ document: doc }: ExtractedDataViewProps) {
                 </span>
               </div>
             )}
-            {onboarding.error && (
+            {!!onboarding.error && (
               <p className="text-xs text-red-400 mt-1">
                 {String(onboarding.error)}
               </p>
@@ -323,7 +323,7 @@ export function ExtractedDataView({ document: doc }: ExtractedDataViewProps) {
             client from this document.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
-            {onboardingHint.display_name && (
+            {!!onboardingHint.display_name && (
               <div>
                 <p className="text-xs text-slate-500">Name</p>
                 <p className="text-slate-200">
@@ -331,7 +331,7 @@ export function ExtractedDataView({ document: doc }: ExtractedDataViewProps) {
                 </p>
               </div>
             )}
-            {onboardingHint.entity_type && (
+            {!!onboardingHint.entity_type && (
               <div>
                 <p className="text-xs text-slate-500">Entity Type</p>
                 <p className="text-slate-200 capitalize">
@@ -339,7 +339,7 @@ export function ExtractedDataView({ document: doc }: ExtractedDataViewProps) {
                 </p>
               </div>
             )}
-            {onboardingHint.industry && (
+            {!!onboardingHint.industry && (
               <div>
                 <p className="text-xs text-slate-500">Industry</p>
                 <p className="text-slate-200">
@@ -347,7 +347,7 @@ export function ExtractedDataView({ document: doc }: ExtractedDataViewProps) {
                 </p>
               </div>
             )}
-            {onboardingHint.annual_revenue_range && (
+            {!!onboardingHint.annual_revenue_range && (
               <div>
                 <p className="text-xs text-slate-500">Revenue Range</p>
                 <p className="text-slate-200">
@@ -355,7 +355,7 @@ export function ExtractedDataView({ document: doc }: ExtractedDataViewProps) {
                 </p>
               </div>
             )}
-            {onboardingHint.profile_json &&
+            {!!onboardingHint.profile_json &&
               typeof onboardingHint.profile_json === "object" &&
               Object.entries(
                 onboardingHint.profile_json as Record<string, unknown>

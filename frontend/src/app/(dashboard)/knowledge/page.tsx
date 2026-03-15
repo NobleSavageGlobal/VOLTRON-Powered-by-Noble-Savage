@@ -59,7 +59,7 @@ export default function KnowledgePage() {
               <div className="flex justify-center py-8"><Spinner /></div>
             ) : searchResults && searchResults.length > 0 ? (
               <div className="space-y-3">
-                {searchResults.map((result: { chunk_id: string; text: string; score: number; document_id: string; page?: number }) => (
+                {searchResults.map((result: { chunk_id: string; text: string; score: number; document_id: string | null; page?: number | null }) => (
                   <div
                     key={result.chunk_id}
                     className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50"

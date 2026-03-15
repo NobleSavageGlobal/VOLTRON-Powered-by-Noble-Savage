@@ -14,7 +14,6 @@ import {
   FileText,
   CheckCircle,
   AlertTriangle,
-  Clock,
   BarChart3,
 } from "lucide-react";
 import { getDocTypeLabel } from "@/lib/utils";
@@ -26,16 +25,6 @@ const STATUS_OPTIONS = [
   "processed",
   "failed",
   "review_required",
-];
-const TYPE_OPTIONS = [
-  "",
-  "bank_statement",
-  "tax_return",
-  "contract",
-  "invoice",
-  "credit_report",
-  "government",
-  "other",
 ];
 
 function StatCard({
