@@ -34,8 +34,14 @@ export default function RegisterPage() {
       await registerUser(data);
       router.push('/dashboard');
     } catch (err: unknown) {
-      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-      setError(detail ?? 'Registration failed. Please try again.');
+      const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+      if (typeof detail === 'string') {
+        setError(detail);
+      } else if (Array.isArray(detail)) {
+        setError(detail.map((d: { msg?: string }) => d?.msg ?? String(d)).join('; '));
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     }
   };
 

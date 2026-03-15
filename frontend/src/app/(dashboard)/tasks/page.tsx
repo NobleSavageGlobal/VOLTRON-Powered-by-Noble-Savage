@@ -41,7 +41,10 @@ export default function TasksPage() {
   } = useForm<TaskFormData>({ resolver: zodResolver(taskSchema) });
 
   const onSubmit = async (data: TaskFormData) => {
-    await createTask(data);
+    await createTask({
+      ...data,
+      due_date: data.due_date || undefined,
+    });
     reset();
     setShowCreate(false);
   };
